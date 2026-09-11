@@ -23,6 +23,7 @@ import pygame
 import sys
 
 
+
 TAILLE_FENETRE = 640, 480
 DIM_PLATEAU = 10, 20
 BORDURE_PLATEAU = 4
@@ -78,8 +79,39 @@ PIECES = {
 		'0000\n0070\n0770\n0070',
 	]}
 
+
+	
+
+
+
+
+
+
+
+
 for name, rotations in PIECES.items():
 	PIECES[name] = [[[int(i) for i in p] for p in r.splitlines()] for r in rotations]
+
+	""" 
+	PIECES est un dictionaire c'est juste un structure
+	O,S,Z,I,J,L,T sont les form des pieces et les retour a la ligne son pour cree des matrice
+	exemple: J = 0000\n5000\n5550\n0000 qui traduit en matrice =    0000
+																	5000
+																	5550
+																	0000
+																	
+			 L = 0000\n0060\n6660\n0000 qui traduit en matrice =    0000
+																	0060
+																	6660
+																	0000
+
+	les different couleur sont baser sur les chiffre (ex:5 = (0, 0, 255) et 6 = (255, 127, 0) )
+
+	for r in rotations  Prend chaque rotation de la pièce.
+	
+	
+	"""
+
 
 COULEURS = {
 	0: (0, 0, 0),
@@ -129,7 +161,7 @@ class Jeu:
 		rect = rendu.get_rect()
 		rect.center = position
 		self.surface.blit(rendu, rect)
-	def _getEvent(self):
+	def _getEvent(self): #recuper se que je fait dans la page d'accueil est fait quelque chose en retour
 		for event in pygame.event.get():
 			if event.type == QUIT:
 				self._quitter()
@@ -145,21 +177,26 @@ class Jeu:
 		print("Quitter")
 		pygame.quit()
 		sys.exit()
+
 	def _rendre(self):
 		pygame.display.update()
 		self.clock.tick()
+
 	def _attente(self):
 		print("Attente")
 		while self._getEvent() == None:
 			self._rendre()
+
 	def _getPiece(self):
 		return PIECES.get(random.choice(PIECES_KEYS))
+	
 	def _getCurrentPieceColor(self):
 		for l in self.current[0]:
 			for c in l:
 				if c != 0:
 					return c
 		return 0
+	
 	def _calculerDonneesPieceCourante(self):
 		m=self.current[self.position[2]]
 		coords = []
