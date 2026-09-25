@@ -30,31 +30,31 @@ class Jeu:
 	"""
 	[Il manque la documentation de la classe]
 	"""
-	def __init__(self):
+	def __init__(self) -> None:
 		pygame.init()
-		self.clock = pygame.time.Clock()
-		self.surface = pygame.display.set_mode(constantes.TAILLE_FENETRE)
-		self.fonts = {
+		self.clock: pygame.time.Clock = pygame.time.Clock()
+		self.surface: pygame.Surface = pygame.display.set_mode(constantes.TAILLE_FENETRE)
+		self.fonts: dict = {
 			'defaut': pygame.font.Font(constantes.POLICE, constantes.TAILLE_POLICE_DEFAUT),
 			'titre': pygame.font.Font(constantes.POLICE, constantes.TAILLE_POLICE_TITRE),
 		}
 		pygame.display.set_caption(constantes.TITRE_FENETRE)
 
-	def start(self):
+	def start(self) -> None:
 		self._afficher_texte(constantes.TEXTE_TITRE, constantes.CENTRE_FENETRE, font='titre')
 		self._afficher_texte(constantes.TEXTE_ATTENTE, constantes.POS)
 		self._attente()
 
-	def stop(self):
+	def stop(self) -> None:
 		self._afficher_texte(constantes.TEXTE_PERDU, constantes.CENTRE_FENETRE, font='titre')
 		self._attente()
 		self._quitter()
 
-	def _afficher_texte(self, text, position, couleur=constantes.COULEUR_DEFAUT_TEXTE, font='defaut'):
+	def _afficher_texte(self, text: str, position: tuple, couleur: int = constantes.COULEUR_DEFAUT_TEXTE, font: str = 'defaut') -> None:
 #		print("Afficher Texte")
-		font = self.fonts.get(font, self.fonts['defaut'])
-		couleur=constantes.COULEURS.get(couleur, constantes.COULEURS[constantes.COULEUR_DEFAUT_TEXTE])
-		rendu = font.render(text, True, couleur)
+		font_obj = self.fonts.get(font, self.fonts['defaut'])
+		couleur_rgb = constantes.COULEURS.get(couleur, constantes.COULEURS[constantes.COULEUR_DEFAUT_TEXTE])
+		rendu = font_obj.render(text, True, couleur_rgb)
 		rect = rendu.get_rect()
 		rect.center = position
 		self.surface.blit(rendu, rect)
@@ -70,70 +70,71 @@ class Jeu:
 				if event.key == K_ESCAPE:
 					continue
 				return event.key
+		return None
 				
-	def _quitter(self):
+	def _quitter(self) -> None:
 		print("Quitter")
 		pygame.quit()
 		sys.exit()
         
-	def _rendre(self):
+	def _rendre(self) -> None:
 		pygame.display.update()
 		self.clock.tick()
         
-	def _attente(self):
+	def _attente(self) -> None:
 		print("Attente")
-		while self._get_event() == None:
+		while self._get_event() is None:
 			self._rendre()
             
-	def _get_piece(self):
+	def _get_piece(self) -> list:
 		return constantes.PIECES.get(random.choice(constantes.PIECES_KEYS))
         
-	def _get_current_piece_color(self):
+	def _get_current_piece_color(self) -> int:
 		for l in self.current[0]:
 			for c in l:
 				if c != 0:
 					return c
 		return 0
         
-	def _calculer_donnees_piece_courante(self):
-		m=self.current[self.position[2]]
-		coords = []
+	def _calculer_donnees_piece_courante(self) -> None:
+		m = self.current[self.position[2]]
+		coords: list = []
 		for i, l in enumerate(m):
 			for j, k in enumerate(l):
 				if k != 0:
-					coords.append([i+self.position[0], j+self.position[1]])
+					coords.append([i + self.position[0], j + self.position[1]])
 		self.coordonnees = coords
         
-	def _est_valide(self, x=0, y=0, r=0):
+	def _est_valide(self, x: int = 0, y: int = 0, r: int = 0) -> bool:
 		max_x, max_y = constantes.DIM_PLATEAU
 		if r == 0:
 			coordonnees = self.coordonnees
 		else:
-			m=self.current[(self.position[2]+r)%len(self.current)]
-			coords = []
+			m = self.current[(self.position[2] + r) % len(self.current)]
+			coords: list = []
 			for i, l in enumerate(m):
 				for j, k in enumerate(l):
 					if k != 0:
-						coords.append([i+self.position[0], j+self.position[1]])
+						coords.append([i + self.position[0], j + self.position[1]])
 			coordonnees = coords
 #			print("Rotation testée: %s" % coordonnees)
 		for cx, cy in coordonnees:
 			if not 0 <= x + cx < max_x:
 #				print("Non valide en X: cx=%s, x=%s" % (cx, x))
 				return False
-			elif cy <0:
+			elif cy < 0:
 				continue
 			elif y + cy >= max_y:
 #				print("Non valide en Y: cy=%s, y=%s" % (cy, y))
 				return False
 			else:
-				if self.plateau[cy+y][cx+x] != 0:
+				if self.plateau[cy + y][cx + x] != 0:
 #					print("Position occupée sur le plateau")
 					return False
 #		print("Position testée valide: x=%s, y=%s" % (x, y))
 		return True
         
-	def _poser_piece(self):
+	def _poser_piece(self) -> None:
 		print("La pièce est posée")
 		if self.position[1] <= 0:
 			self.perdu = True
@@ -141,7 +142,7 @@ class Jeu:
 		couleur = self._get_current_piece_color()
 		for cx, cy in self.coordonnees:
 			self.plateau[cy][cx] = couleur
-		completees = []
+		completees: list = []
 		# calculer les lignes complétées
 		for i, line in enumerate(self.plateau[::-1]):
 			for case in line:
@@ -149,8 +150,8 @@ class Jeu:
 					break
 			else:
 				print(self.plateau)
-				print(">>> %s" % (constantes.DIM_PLATEAU[1]-1-i))
-				completees.append(constantes.DIM_PLATEAU[1]-1-i)
+				print(">>> %s" % (constantes.DIM_PLATEAU[1] - 1 - i))
+				completees.append(constantes.DIM_PLATEAU[1] - 1 - i)
 		lignes = len(completees)
 		for i in completees:
 			self.plateau.pop(i)
@@ -161,25 +162,31 @@ class Jeu:
 		self.score += lignes * self.niveau
 		self.niveau = int(self.lignes / constantes.LIGNES_PAR_NIVEAU) + 1
 		if lignes >= constantes.LIGNES_TETRIS:
-			self.tetris +=1
+			self.tetris += 1
 			self.score += self.niveau * self.tetris
 		# Travail avec la pièce courante terminé
 		self.current = None
         
-	def _first(self):
-		self.plateau = [[0] * constantes.DIM_PLATEAU[0] for i in range(constantes.DIM_PLATEAU[1])]
-		self.score, self.pieces, self.lignes, self.tetris, self.niveau = 0, 0, 0, 0, 1
-		self.current, self.next, self.perdu = None, self._get_piece(), False
+	def _first(self) -> None:
+		self.plateau: list = [[0] * constantes.DIM_PLATEAU[0] for _ in range(constantes.DIM_PLATEAU[1])]
+		self.score: int = 0
+		self.pieces: int = 0
+		self.lignes: int = 0
+		self.tetris: int = 0
+		self.niveau: int = 1
+		self.next: list = self._get_piece()
+		self.current = None
+		self.perdu: bool = False
         
-	def _next(self):
+	def _next(self) -> None:
 		print("Piece suivante")
 		self.current, self.next = self.next, self._get_piece()
 		self.pieces += 1
-		self.position = [int(constantes.DIM_PLATEAU[0] / 2)-2, -4, 0]
+		self.position: list = [int(constantes.DIM_PLATEAU[0] / 2) - 2, -4, 0]
 		self._calculer_donnees_piece_courante()
 		self.dernier_mouvement = self.derniere_chute = time.time()
         
-	def _gerer_evenements(self):
+	def _gerer_evenements(self) -> None:
 		event = self._get_event()
 		if event == K_p:
 			print("Pause")
@@ -202,19 +209,19 @@ class Jeu:
 		elif event == K_UP:
 			print("Mouvement de rotation")
 			if self._est_valide(r=1):
-				self.position[2] = (self.position[2] + 1) %len(self.current)
+				self.position[2] = (self.position[2] + 1) % len(self.current)
 		elif event == K_SPACE:
 			print("Mouvement de chute %s / %s" % (self.position, self.coordonnees))
-			if self.position[1] <=0:
+			if self.position[1] <= 0:
 				self.position[1] = 1
 				self._calculer_donnees_piece_courante()
 			a = 0
 			while self._est_valide(y=a):
-				a+=1
-			self.position[1] += a-1
+				a += 1
+			self.position[1] += a - 1
 		self._calculer_donnees_piece_courante()
         
-	def _gerer_gravite(self):
+	def _gerer_gravite(self) -> None:
 		if time.time() - self.derniere_chute > constantes.DELAI_CHUTE:
 			self.derniere_chute = time.time()
 			if not self._est_valide():
@@ -230,9 +237,9 @@ class Jeu:
 				self.position[1] += 1
 				self._calculer_donnees_piece_courante()
                 
-	def _dessiner_plateau(self):
+	def _dessiner_plateau(self) -> None:
 		self.surface.fill(constantes.COULEURS.get(constantes.COULEUR_FOND))
-		pygame.draw.rect(self.surface, constantes.COULEURS[8], constantes.START_PLABORD+constantes.TAILLE_PLABORD, constantes.BORDURE_PLATEAU)
+		pygame.draw.rect(self.surface, constantes.COULEURS[8], constantes.START_PLABORD + constantes.TAILLE_PLABORD, constantes.BORDURE_PLATEAU)
 		for i, ligne in enumerate(self.plateau):
 			for j, case in enumerate(ligne):
 				couleur = constantes.COULEURS[case]
@@ -244,7 +251,7 @@ class Jeu:
 				couleur = constantes.COULEURS.get(self._get_current_piece_color())
 				coordonnees = tuple([constantes.START_PLATEAU[k] + position[k] * constantes.TAILLE_BLOC[k] for k in range(2)])
 				pygame.draw.rect(self.surface, couleur, coordonnees + constantes.TAILLE_BLOC)
-		self.score, self.pieces, self.lignes, self.tetris, self.niveau#TODO
+                
 		self._afficher_texte(constantes.FORMAT_SCORE % self.score, constantes.POSITION_SCORE)
 		self._afficher_texte(constantes.FORMAT_PIECES % self.pieces, constantes.POSITION_PIECES)
 		self._afficher_texte(constantes.FORMAT_LIGNES % self.lignes, constantes.POSITION_LIGNES)
@@ -253,7 +260,7 @@ class Jeu:
 
 		self._rendre()
         
-	def play(self):
+	def play(self) -> None:
 		print("Jouer")
 		self.surface.fill(constantes.COULEURS.get(constantes.COULEUR_FOND))
 		self._first()
