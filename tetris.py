@@ -35,29 +35,31 @@ class Jeu:
 		self.clock = pygame.time.Clock()
 		self.surface = pygame.display.set_mode(constantes.TAILLE_FENETRE)
 		self.fonts = {
-			'defaut': pygame.font.Font('freesansbold.ttf', 18),
-			'titre': pygame.font.Font('freesansbold.ttf', 100),
+			'defaut': pygame.font.Font(constantes.POLICE, constantes.TAILLE_POLICE_DEFAUT),
+			'titre': pygame.font.Font(constantes.POLICE, constantes.TAILLE_POLICE_TITRE),
 		}
-		pygame.display.set_caption('Application Tetris')
+		pygame.display.set_caption(constantes.TITRE_FENETRE)
 
 	def start(self):
-		self._afficherTexte('Tetris', constantes.CENTRE_FENETRE, font = 'titre')
-		self._afficherTexte('Appuyer sur une touche...', constantes.POS)
+		self._afficherTexte(constantes.TEXTE_TITRE, constantes.CENTRE_FENETRE, font = 'titre')
+		self._afficherTexte(constantes.TEXTE_ATTENTE, constantes.POS)
 		self._attente()
 
 	def stop(self):
-		self._afficherTexte('Perdu', constantes.CENTRE_FENETRE, font='titre')
+		self._afficherTexte(constantes.TEXTE_PERDU, constantes.CENTRE_FENETRE, font='titre')
 		self._attente()
 		self._quitter()
 
-	def _afficherTexte(self, text, position, couleur=9, font='defaut'):
+	def _afficherTexte(self, text, position, couleur=constantes.COULEUR_DEFAUT_TEXTE, font='defaut'):
 #		print("Afficher Texte")
 		font = self.fonts.get(font, self.fonts['defaut'])
-		couleur=constantes.COULEURS.get(couleur, constantes.COULEURS[9])
+		couleur=constantes.COULEURS.get(couleur, constantes.COULEURS[constantes.COULEUR_DEFAUT_TEXTE])
 		rendu = font.render(text, True, couleur)
 		rect = rendu.get_rect()
 		rect.center = position
 		self.surface.blit(rendu, rect)
+
+		
 	def _getEvent(self):
 		for event in pygame.event.get():
 			if event.type == QUIT:
@@ -69,26 +71,38 @@ class Jeu:
 				if event.key == K_ESCAPE:
 					continue
 				return event.key
-				
+
+			
 	def _quitter(self):
 		print("Quitter")
 		pygame.quit()
 		sys.exit()
+
+
 	def _rendre(self):
 		pygame.display.update()
 		self.clock.tick()
+
+
 	def _attente(self):
 		print("Attente")
 		while self._getEvent() == None:
 			self._rendre()
+
+
 	def _getPiece(self):
 		return constantes.PIECES.get(random.choice(constantes.PIECES_KEYS))
+
+
+	
 	def _getCurrentPieceColor(self):
 		for l in self.current[0]:
 			for c in l:
 				if c != 0:
 					return c
 		return 0
+
+	
 	def _calculerDonneesPieceCourante(self):
 		m=self.current[self.position[2]]
 		coords = []
@@ -97,6 +111,8 @@ class Jeu:
 				if k != 0:
 					coords.append([i+self.position[0], j+self.position[1]])
 		self.coordonnees = coords
+
+
 	def _estValide(self, x=0, y=0, r=0):
 		max_x, max_y = constantes.DIM_PLATEAU
 		if r == 0:
@@ -125,6 +141,8 @@ class Jeu:
 					return False
 #		print("Position testée valide: x=%s, y=%s" % (x, y))
 		return True
+
+	
 	def _poserPiece(self):
 		print("La pièce est posée")
 		if self.position[1] <= 0:
@@ -151,16 +169,20 @@ class Jeu:
 		# calculer le score et autre
 		self.lignes += lignes
 		self.score += lignes * self.niveau
-		self.niveau = int(self.lignes / 10) + 1
-		if lignes >= 4:
+		self.niveau = int(self.lignes / constantes.LIGNES_PAR_NIVEAU) + 1
+		if lignes >= constantes.LIGNES_TETRIS:
 			self.tetris +=1
 			self.score += self.niveau * self.tetris
 		# Travail avec la pièce courante terminé
 		self.current = None
+
+
 	def _first(self):
 		self.plateau = [[0] * constantes.DIM_PLATEAU[0] for i in range(constantes.DIM_PLATEAU[1])]
 		self.score, self.pieces, self.lignes, self.tetris, self.niveau = 0, 0, 0, 0, 1
 		self.current, self.next, self.perdu = None, self._getPiece(), False
+
+
 	def _next(self):
 		print("Piece suivante")
 		self.current, self.next = self.next, self._getPiece()
@@ -168,13 +190,15 @@ class Jeu:
 		self.position = [int(constantes.DIM_PLATEAU[0] / 2)-2, -4, 0]
 		self._calculerDonneesPieceCourante()
 		self.dernier_mouvement = self.derniere_chute = time.time()
+
+
 	def _gererEvenements(self):
 		event = self._getEvent()
 		if event == K_p:
 			print("Pause")
-			self.surface.fill(constantes.COULEURS.get(0))
-			self._afficherTexte('Pause', constantes.CENTRE_FENETRE, font='titre')
-			self._afficherTexte('Appuyer sur une touche...', constantes.POS)
+			self.surface.fill(constantes.COULEURS.get(constantes.COULEUR_FOND))
+			self._afficherTexte(constantes.TEXTE_PAUSE, constantes.CENTRE_FENETRE, font='titre')
+			self._afficherTexte(constantes.TEXTE_ATTENTE, constantes.POS)
 			self._attente()
 		elif event == K_LEFT:
 			print("Mouvement vers la gauche")
@@ -202,8 +226,11 @@ class Jeu:
 				a+=1
 			self.position[1] += a-1
 		self._calculerDonneesPieceCourante()
+
+
+
 	def _gererGravite(self):
-		if time.time() - self.derniere_chute > 0.35:
+		if time.time() - self.derniere_chute > constantes.DELAI_CHUTE:
 			self.derniere_chute = time.time()
 			if not self._estValide():
 				print ("On est dans une position invalide")
@@ -217,8 +244,11 @@ class Jeu:
 				print("On déplace vers le bas")
 				self.position[1] += 1
 				self._calculerDonneesPieceCourante()
+
+
+
 	def _dessinerPlateau(self):
-		self.surface.fill(constantes.COULEURS.get(0))
+		self.surface.fill(constantes.COULEURS.get(constantes.COULEUR_FOND))
 		pygame.draw.rect(self.surface, constantes.COULEURS[8], constantes.START_PLABORD+constantes.TAILLE_PLABORD, constantes.BORDURE_PLATEAU)
 		for i, ligne in enumerate(self.plateau):
 			for j, case in enumerate(ligne):
@@ -232,16 +262,19 @@ class Jeu:
 				coordonnees = tuple([constantes.START_PLATEAU[k] + position[k] * constantes.TAILLE_BLOC[k] for k in range(2)])
 				pygame.draw.rect(self.surface, couleur, coordonnees + constantes.TAILLE_BLOC)
 		self.score, self.pieces, self.lignes, self.tetris, self.niveau#TODO
-		self._afficherTexte('Score: >%s' % self.score, constantes.POSITION_SCORE)
-		self._afficherTexte('Pièces: %s' % self.pieces, constantes.POSITION_PIECES)
-		self._afficherTexte('Lignes: %s' % self.lignes, constantes.POSITION_LIGNES)
-		self._afficherTexte('Tetris: %s' % self.tetris, constantes.POSITION_TETRIS)
-		self._afficherTexte('Niveau: %s' % self.niveau, constantes.POSITION_NIVEAU)
+		self._afficherTexte(constantes.FORMAT_SCORE % self.score, constantes.POSITION_SCORE)
+		self._afficherTexte(constantes.FORMAT_PIECES % self.pieces, constantes.POSITION_PIECES)
+		self._afficherTexte(constantes.FORMAT_LIGNES % self.lignes, constantes.POSITION_LIGNES)
+		self._afficherTexte(constantes.FORMAT_TETRIS % self.tetris, constantes.POSITION_TETRIS)
+		self._afficherTexte(constantes.FORMAT_NIVEAU % self.niveau, constantes.POSITION_NIVEAU)
 
 		self._rendre()
+
+
+
 	def play(self):
 		print("Jouer")
-		self.surface.fill(constantes.COULEURS.get(0))
+		self.surface.fill(constantes.COULEURS.get(constantes.COULEUR_FOND))
 		self._first()
 		while not self.perdu:
 			if self.current is None:
@@ -259,4 +292,3 @@ if __name__ == '__main__':
 	print("Partie terminée")
 	j.stop()
 	print("Arrêt du programme")
-

@@ -1,3 +1,28 @@
+# Nouvelle constante
+POLICE = 'freesansbold.ttf'
+TAILLE_POLICE_DEFAUT = 18
+TAILLE_POLICE_TITRE = 100
+
+TITRE_FENETRE = 'Application Tetris'
+TEXTE_TITRE = 'Tetris'
+TEXTE_ATTENTE = 'Appuyer sur une touche...'
+TEXTE_PERDU = 'Perdu'
+TEXTE_PAUSE = 'Pause'
+
+FORMAT_SCORE = 'Score: >%s'
+FORMAT_PIECES = 'Pièces: %s'
+FORMAT_LIGNES = 'Lignes: %s'
+FORMAT_TETRIS = 'Tetris: %s'
+FORMAT_NIVEAU = 'Niveau: %s'
+
+COULEUR_DEFAUT_TEXTE = 9
+COULEUR_FOND = 0
+
+LIGNES_PAR_NIVEAU = 10
+LIGNES_TETRIS = 4
+DELAI_CHUTE = 0.35
+
+#constant du tetris de base 
 TAILLE_FENETRE = 640, 480
 DIM_PLATEAU = 10, 20
 BORDURE_PLATEAU = 4
