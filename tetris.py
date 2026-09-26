@@ -1,9 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-"""Jeu Tetris avec Pygame."""
 
-# On désactive les erreurs trop strictes ou liées aux particularités de Pygame
-# pylint: disable=no-member, no-name-in-module, too-many-instance-attributes, too-many-branches
+"""
+[Ce bloc est la documentation du module]
+Un Tetris avec Pygame.
+Ce code est basee sur le code de Sébastien CHAZALLET, auteur du livre "Python 3, les fondamentaux du language"
+"""
 
 __author__ = "Yanis Nedjar"
 __copyright__ = "Copyright 2022"
@@ -16,7 +18,7 @@ import sys
 import time
 
 import pygame
-# Découpage de l'importation sur plusieurs lignes pour respecter la limite de 100 caractères
+# Probleme de l'ordre des imports
 from pygame.locals import (
     QUIT, KEYUP, KEYDOWN, K_ESCAPE, K_p, 
     K_LEFT, K_RIGHT, K_DOWN, K_UP, K_SPACE
@@ -24,11 +26,13 @@ from pygame.locals import (
 
 import constantes
 
+# Classe Tetris
 class Jeu:
-    """Classe principale du jeu Tetris."""
+    """
+    [Il manque la documentation de la classe]
+    """
 
     def __init__(self):
-        """Initialise pygame et la fenêtre."""
         pygame.init()
         self.clock = pygame.time.Clock()
         self.surface = pygame.display.set_mode(constantes.TAILLE_FENETRE)
@@ -52,24 +56,18 @@ class Jeu:
         self.derniere_chute = 0.0
 
     def start(self):
-        """Affiche l'écran de démarrage."""
         self._afficher_texte(constantes.TEXTE_TITRE, constantes.CENTRE_FENETRE, font='titre')
         self._afficher_texte(constantes.TEXTE_ATTENTE, constantes.POS)
         self._attente()
 
     def stop(self):
-        """Affiche l'écran de fin."""
         self._afficher_texte(constantes.TEXTE_PERDU, constantes.CENTRE_FENETRE, font='titre')
         self._attente()
         self._quitter()
 
-    # Découpage de la fonction pour éviter la ligne trop longue
-    def _afficher_texte(self, text, position, 
-                        couleur=constantes.COULEUR_DEFAUT_TEXTE, font='defaut'):
-        """Affiche du texte sur la fenêtre."""
+    def _afficher_texte(self, text, position, couleur=constantes.COULEUR_DEFAUT_TEXTE, font='defaut'):
         font_obj = self.fonts.get(font, self.fonts['defaut'])
         
-        # Découpage pour éviter la ligne trop longue
         couleur_rgb = constantes.COULEURS.get(
             couleur, constantes.COULEURS[constantes.COULEUR_DEFAUT_TEXTE]
         )
@@ -79,7 +77,6 @@ class Jeu:
         self.surface.blit(rendu, rect)
 
     def _get_event(self):
-        """Récupère les événements clavier."""
         for event in pygame.event.get():
             if event.type == QUIT:
                 self._quitter()
@@ -93,26 +90,21 @@ class Jeu:
         return None
 
     def _quitter(self):
-        """Quitte le programme."""
         pygame.quit()
         sys.exit()
 
     def _rendre(self):
-        """Met à jour l'affichage."""
         pygame.display.update()
         self.clock.tick()
 
     def _attente(self):
-        """Met le jeu en pause."""
         while self._get_event() is None:
             self._rendre()
 
     def _get_piece(self):
-        """Renvoie une pièce aléatoire."""
         return constantes.PIECES.get(random.choice(constantes.PIECES_KEYS))
 
     def _get_current_piece_color(self):
-        """Renvoie la couleur de la pièce."""
         for ligne in self.current[0]:
             for case in ligne:
                 if case != 0:
@@ -120,7 +112,6 @@ class Jeu:
         return 0
 
     def _calculer_donnees_piece_courante(self):
-        """Calcule les coordonnées de la pièce."""
         matrice = self.current[self.position[2]]
         coords = []
         for i, ligne in enumerate(matrice):
@@ -130,7 +121,6 @@ class Jeu:
         self.coordonnees = coords
 
     def _est_valide(self, dec_x=0, dec_y=0, rot=0):
-        """Vérifie les collisions."""
         max_x, max_y = constantes.DIM_PLATEAU
         if rot == 0:
             coordonnees = self.coordonnees
@@ -155,7 +145,6 @@ class Jeu:
         return True
 
     def _poser_piece(self):
-        """Pose la pièce sur le plateau."""
         if self.position[1] <= 0:
             self.perdu = True
 
@@ -186,13 +175,11 @@ class Jeu:
         self.current = None
 
     def _first(self):
-        """Prépare une nouvelle partie."""
         self.plateau = [[0] * constantes.DIM_PLATEAU[0] for _ in range(constantes.DIM_PLATEAU[1])]
         self.score, self.pieces, self.lignes, self.tetris, self.niveau = 0, 0, 0, 0, 1
         self.current, self.next, self.perdu = None, self._get_piece(), False
 
     def _next(self):
-        """Passe à la pièce suivante."""
         self.current, self.next = self.next, self._get_piece()
         self.pieces += 1
         self.position = [int(constantes.DIM_PLATEAU[0] / 2) - 2, -4, 0]
@@ -200,7 +187,6 @@ class Jeu:
         self.derniere_chute = time.time()
 
     def _gerer_evenements(self):
-        """Gère les contrôles."""
         event = self._get_event()
         if event == K_p:
             self.surface.fill(constantes.COULEURS.get(constantes.COULEUR_FOND))
@@ -231,7 +217,6 @@ class Jeu:
             self._calculer_donnees_piece_courante()
 
     def _gerer_gravite(self):
-        """Gère la chute."""
         if time.time() - self.derniere_chute > constantes.DELAI_CHUTE:
             self.derniere_chute = time.time()
             if not self._est_valide():
@@ -246,7 +231,6 @@ class Jeu:
                 self._calculer_donnees_piece_courante()
 
     def _dessiner_plateau(self):
-        """Dessine le jeu et l'interface."""
         self.surface.fill(constantes.COULEURS.get(constantes.COULEUR_FOND))
         pygame.draw.rect(self.surface, constantes.COULEURS[8],
                          constantes.START_PLABORD + constantes.TAILLE_PLABORD,
@@ -256,7 +240,6 @@ class Jeu:
             for j, case in enumerate(ligne):
                 couleur = constantes.COULEURS[case]
                 position = j, i
-                # Découpage pour éviter la ligne trop longue
                 coordonnees = tuple(
                     constantes.START_PLATEAU[k] + position[k] * constantes.TAILLE_BLOC[k]
                     for k in range(2)
@@ -266,7 +249,6 @@ class Jeu:
         if self.current is not None:
             for position in self.coordonnees:
                 couleur = constantes.COULEURS.get(self._get_current_piece_color())
-                # Découpage pour éviter la ligne trop longue
                 coordonnees = tuple(
                     constantes.START_PLATEAU[k] + position[k] * constantes.TAILLE_BLOC[k]
                     for k in range(2)
@@ -282,7 +264,6 @@ class Jeu:
         self._rendre()
 
     def play(self):
-        """Boucle principale."""
         self.surface.fill(constantes.COULEURS.get(constantes.COULEUR_FOND))
         self._first()
         while not self.perdu:
