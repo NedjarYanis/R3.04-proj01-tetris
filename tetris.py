@@ -81,9 +81,19 @@ PIECES = {
     ]
 }
 
+
+	
+
+
+
+
+
 for name, rotations in PIECES.items():
     PIECES[name] = [[[int(i) for i in p] for p in r.splitlines()]
                     for r in rotations]
+
+
+
 
 COULEURS = {
     0: (0, 0, 0),
@@ -353,6 +363,8 @@ class Jeu:
             self._gererEvenements()
             self._gererGravite()
             self._dessinerPlateau()
+
+
 
 if __name__ == '__main__':
     j = Jeu()
