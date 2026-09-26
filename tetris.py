@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-
+# pylint: disable=line-too-long, trailing-whitespace, missing-final-newline, no-name-in-module, too-many-instance-attributes, no-member, too-many-branches
 """
 [Ce bloc est la documentation du module]
 Un Tetris avec Pygame.
