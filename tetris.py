@@ -18,7 +18,6 @@ import sys
 import time
 
 import pygame
-# Probleme de l'ordre des imports
 from pygame.locals import (
     QUIT, KEYUP, KEYDOWN, K_ESCAPE, K_p, 
     K_LEFT, K_RIGHT, K_DOWN, K_UP, K_SPACE
