@@ -23,6 +23,7 @@ import pygame
 import sys
 
 
+
 TAILLE_FENETRE = 640, 480
 DIM_PLATEAU = 10, 20
 BORDURE_PLATEAU = 4
@@ -78,8 +79,36 @@ PIECES = {
 		'0000\n0070\n0770\n0070',
 	]}
 
+
+	
+
+
+
+
+
 for name, rotations in PIECES.items():
 	PIECES[name] = [[[int(i) for i in p] for p in r.splitlines()] for r in rotations]
+
+	""" 
+	PIECES est un dictionaire c'est juste une structure
+	O,S,Z,I,J,L,T sont les form des pieces et les retour a la ligne son pour cree des matrice
+	exemple: J = 0000\n5000\n5550\n0000 qui traduit en matrice =    0000
+																	5000
+																	5550
+																	0000
+																	
+			 L = 0000\n0060\n6660\n0000 qui traduit en matrice =    0000
+																	0060
+																	6660
+																	0000
+
+	les different couleur sont baser sur les chiffre (ex:5 = (0, 0, 255) et 6 = (255, 127, 0) (R,G,B) )
+
+	for r in rotations  Prend chaque rotation de la pièce.
+	
+	
+	"""
+
 
 COULEURS = {
 	0: (0, 0, 0),
@@ -103,16 +132,16 @@ class Jeu:
 	"""
 	def __init__(self):
 		pygame.init()
-		self.clock = pygame.time.Clock()
-		self.surface = pygame.display.set_mode(TAILLE_FENETRE)
+		self.clock = pygame.time.Clock() #Active le timer
+		self.surface = pygame.display.set_mode(TAILLE_FENETRE)#Dimensionne le plateau de jeux
 		self.fonts = {
-			'defaut': pygame.font.Font('freesansbold.ttf', 18),
+			'defaut': pygame.font.Font('freesansbold.ttf', 18),#cree des preset de texte : Titre et default
 			'titre': pygame.font.Font('freesansbold.ttf', 100),
 		}
-		pygame.display.set_caption('Application Tetris')
+		pygame.display.set_caption('Application Tetris')#definit le texte qui s'affichera tout en haut de  la fenetre 
 
 	def start(self):
-		self._afficherTexte('Tetris', CENTRE_FENETRE, font = 'titre')
+		self._afficherTexte('Tetris', CENTRE_FENETRE, font = 'titre')#affiche un texte avant le lancement du jeux
 		self._afficherTexte('Appuyer sur une touche...', POS)
 		self._attente()
 
@@ -129,7 +158,8 @@ class Jeu:
 		rect = rendu.get_rect()
 		rect.center = position
 		self.surface.blit(rendu, rect)
-	def _getEvent(self):
+
+	def _getEvent(self): #recuper se que je fait l'utilisateur 
 		for event in pygame.event.get():
 			if event.type == QUIT:
 				self._quitter()
@@ -145,78 +175,91 @@ class Jeu:
 		print("Quitter")
 		pygame.quit()
 		sys.exit()
+
 	def _rendre(self):
 		pygame.display.update()
 		self.clock.tick()
+
 	def _attente(self):
 		print("Attente")
 		while self._getEvent() == None:
 			self._rendre()
+
 	def _getPiece(self):
 		return PIECES.get(random.choice(PIECES_KEYS))
+	
 	def _getCurrentPieceColor(self):
-		for l in self.current[0]:
-			for c in l:
-				if c != 0:
-					return c
+		for l in self.current[0]:#recuper tout les rotation
+			for c in l:#regarde chaque ligne
+				if c != 0:#si il y a 0 sa signifi que c'est vide elle fait rien 
+					return c #si c'est autre chose elle revoit le chiffre (la couleur)
 		return 0
+	
 	def _calculerDonneesPieceCourante(self):
-		m=self.current[self.position[2]]
+		m=self.current[self.position[2]]# est egal ala rotation actuel de la piece
+
 		coords = []
-		for i, l in enumerate(m):
-			for j, k in enumerate(l):
-				if k != 0:
-					coords.append([i+self.position[0], j+self.position[1]])
-		self.coordonnees = coords
+		for i, l in enumerate(m):#parcour tout les ligne du plateau + les note
+			for j, k in enumerate(l):#parcour tout les colonne + les note
+				if k != 0: #si elle est pas vide 
+					coords.append([i+self.position[0], j+self.position[1]]) #j'ajoute la position en X et Y
+		self.coordonnees = coords #j'ajoute se duo 
+
 	def _estValide(self, x=0, y=0, r=0):
-		max_x, max_y = DIM_PLATEAU
-		if r == 0:
+		max_x, max_y = DIM_PLATEAU #recuper les cordonee X et Y max
+		if r == 0: 
 			coordonnees = self.coordonnees
 		else:
 			m=self.current[(self.position[2]+r)%len(self.current)]
+			#sélectionne le dessin de la future rotation. 
+			# Le symbole mathématique % (modulo) agit comme une boucle : 
+			# si on tourne la pièce alors qu'elle est déjà à sa dernière position elle revienau dessin numéro 1.
 			coords = []
-			for i, l in enumerate(m):
+			for i, l in enumerate(m): #re-calcul les cordonne de la piece apres rotation
 				for j, k in enumerate(l):
 					if k != 0:
 						coords.append([i+self.position[0], j+self.position[1]])
+
 			coordonnees = coords
 #			print("Rotation testée: %s" % coordonnees)
-		for cx, cy in coordonnees:
-			if not 0 <= x + cx < max_x:
+		for cx, cy in coordonnees: #recuper tout les bloc de la piece
+			if not 0 <= x + cx < max_x:#verfie qui sort pas des limite gauche droite
 #				print("Non valide en X: cx=%s, x=%s" % (cx, x))
 				return False
-			elif cy <0:
+			elif cy <0: #si le bloque n'est pas completement arriver (encore au dessu) on continu
 				continue
-			elif y + cy >= max_y:
+			elif y + cy >= max_y:#verfie que on transperce pas le sole
 #				print("Non valide en Y: cy=%s, y=%s" % (cy, y))
 				return False
 			else:
-				if self.plateau[cy+y][cx+x] != 0:
+				if self.plateau[cy+y][cx+x] != 0: #verfie en memoir si il y a pad deja une piece 
 #					print("Position occupée sur le plateau")
 					return False
 #		print("Position testée valide: x=%s, y=%s" % (x, y))
 		return True
+
+	
 	def _poserPiece(self):
 		print("La pièce est posée")
-		if self.position[1] <= 0:
+		if self.position[1] <= 0: #verfie si la piece depasse au dessus
 			self.perdu = True
 		# Ajout de la pièce parmi le plateau
 		couleur = self._getCurrentPieceColor()
 		for cx, cy in self.coordonnees:
-			self.plateau[cy][cx] = couleur
+			self.plateau[cy][cx] = couleur # change la case vide (noire) par la case du bloc en qustion
 		completees = []
 		# calculer les lignes complétées
-		for i, line in enumerate(self.plateau[::-1]):
+		for i, line in enumerate(self.plateau[::-1]): #redgarde en partant du bas 
 			for case in line:
-				if case == 0:
-					break
+				if case == 0:#si il y a un troue (0)
+					break #passe a ligne du dessu
 			else:
 				print(self.plateau)
 				print(">>> %s" % (DIM_PLATEAU[1]-1-i))
-				completees.append(DIM_PLATEAU[1]-1-i)
+				completees.append(DIM_PLATEAU[1]-1-i)#si il trouvre aucun troue il la mais completer 
 		lignes = len(completees)
 		for i in completees:
-			self.plateau.pop(i)
+			self.plateau.pop(i)#suprime la ligne
 		for i in range(lignes):
 			self.plateau.insert(0, [0] * DIM_PLATEAU[0])
 		# calculer le score et autre
@@ -228,10 +271,15 @@ class Jeu:
 			self.score += self.niveau * self.tetris
 		# Travail avec la pièce courante terminé
 		self.current = None
+
+
 	def _first(self):
-		self.plateau = [[0] * DIM_PLATEAU[0] for i in range(DIM_PLATEAU[1])]
+		self.plateau = [[0] * DIM_PLATEAU[0] for i in range(DIM_PLATEAU[1])]#
 		self.score, self.pieces, self.lignes, self.tetris, self.niveau = 0, 0, 0, 0, 1
 		self.current, self.next, self.perdu = None, self._getPiece(), False
+
+
+
 	def _next(self):
 		print("Piece suivante")
 		self.current, self.next = self.next, self._getPiece()
@@ -239,6 +287,9 @@ class Jeu:
 		self.position = [int(DIM_PLATEAU[0] / 2)-2, -4, 0]
 		self._calculerDonneesPieceCourante()
 		self.dernier_mouvement = self.derniere_chute = time.time()
+
+
+
 	def _gererEvenements(self):
 		event = self._getEvent()
 		if event == K_p:
@@ -273,6 +324,9 @@ class Jeu:
 				a+=1
 			self.position[1] += a-1
 		self._calculerDonneesPieceCourante()
+
+
+
 	def _gererGravite(self):
 		if time.time() - self.derniere_chute > 0.35:
 			self.derniere_chute = time.time()
@@ -288,6 +342,9 @@ class Jeu:
 				print("On déplace vers le bas")
 				self.position[1] += 1
 				self._calculerDonneesPieceCourante()
+
+
+
 	def _dessinerPlateau(self):
 		self.surface.fill(COULEURS.get(0))
 		pygame.draw.rect(self.surface, COULEURS[8], START_PLABORD+TAILLE_PLABORD, BORDURE_PLATEAU)
@@ -310,6 +367,9 @@ class Jeu:
 		self._afficherTexte('Niveau: %s' % self.niveau, POSITION_NIVEAU)
 
 		self._rendre()
+
+
+
 	def play(self):
 		print("Jouer")
 		self.surface.fill(COULEURS.get(0))
@@ -320,6 +380,8 @@ class Jeu:
 			self._gererEvenements()
 			self._gererGravite()
 			self._dessinerPlateau()
+
+
 
 if __name__ == '__main__':
 	j = Jeu()
