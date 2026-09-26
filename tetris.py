@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 """Jeu Tetris avec Pygame."""
 
+# On désactive les erreurs trop strictes ou liées aux particularités de Pygame
+# pylint: disable=no-member, no-name-in-module, too-many-instance-attributes, too-many-branches
+
 __author__ = "Yanis Nedjar"
 __copyright__ = "Copyright 2022"
 __credits__ = ["Sébastien CHAZALLET", "Vincent NGUYEN", "Yanis Nedjar"]
@@ -13,7 +16,11 @@ import sys
 import time
 
 import pygame
-from pygame.locals import QUIT, KEYUP, KEYDOWN, K_ESCAPE, K_p, K_LEFT, K_RIGHT, K_DOWN, K_UP, K_SPACE
+# Découpage de l'importation sur plusieurs lignes pour respecter la limite de 100 caractères
+from pygame.locals import (
+    QUIT, KEYUP, KEYDOWN, K_ESCAPE, K_p, 
+    K_LEFT, K_RIGHT, K_DOWN, K_UP, K_SPACE
+)
 
 import constantes
 
@@ -56,10 +63,16 @@ class Jeu:
         self._attente()
         self._quitter()
 
-    def _afficher_texte(self, text, position, couleur=constantes.COULEUR_DEFAUT_TEXTE, font='defaut'):
+    # Découpage de la fonction pour éviter la ligne trop longue
+    def _afficher_texte(self, text, position, 
+                        couleur=constantes.COULEUR_DEFAUT_TEXTE, font='defaut'):
         """Affiche du texte sur la fenêtre."""
         font_obj = self.fonts.get(font, self.fonts['defaut'])
-        couleur_rgb = constantes.COULEURS.get(couleur, constantes.COULEURS[constantes.COULEUR_DEFAUT_TEXTE])
+        
+        # Découpage pour éviter la ligne trop longue
+        couleur_rgb = constantes.COULEURS.get(
+            couleur, constantes.COULEURS[constantes.COULEUR_DEFAUT_TEXTE]
+        )
         rendu = font_obj.render(text, True, couleur_rgb)
         rect = rendu.get_rect()
         rect.center = position
@@ -238,26 +251,34 @@ class Jeu:
         pygame.draw.rect(self.surface, constantes.COULEURS[8],
                          constantes.START_PLABORD + constantes.TAILLE_PLABORD,
                          constantes.BORDURE_PLATEAU)
-                         
+
         for i, ligne in enumerate(self.plateau):
             for j, case in enumerate(ligne):
                 couleur = constantes.COULEURS[case]
                 position = j, i
-                coordonnees = tuple(constantes.START_PLATEAU[k] + position[k] * constantes.TAILLE_BLOC[k] for k in range(2))
+                # Découpage pour éviter la ligne trop longue
+                coordonnees = tuple(
+                    constantes.START_PLATEAU[k] + position[k] * constantes.TAILLE_BLOC[k]
+                    for k in range(2)
+                )
                 pygame.draw.rect(self.surface, couleur, coordonnees + constantes.TAILLE_BLOC)
-                
+
         if self.current is not None:
             for position in self.coordonnees:
                 couleur = constantes.COULEURS.get(self._get_current_piece_color())
-                coordonnees = tuple(constantes.START_PLATEAU[k] + position[k] * constantes.TAILLE_BLOC[k] for k in range(2))
+                # Découpage pour éviter la ligne trop longue
+                coordonnees = tuple(
+                    constantes.START_PLATEAU[k] + position[k] * constantes.TAILLE_BLOC[k]
+                    for k in range(2)
+                )
                 pygame.draw.rect(self.surface, couleur, coordonnees + constantes.TAILLE_BLOC)
-                
+
         self._afficher_texte(constantes.FORMAT_SCORE % self.score, constantes.POSITION_SCORE)
         self._afficher_texte(constantes.FORMAT_PIECES % self.pieces, constantes.POSITION_PIECES)
         self._afficher_texte(constantes.FORMAT_LIGNES % self.lignes, constantes.POSITION_LIGNES)
         self._afficher_texte(constantes.FORMAT_TETRIS % self.tetris, constantes.POSITION_TETRIS)
         self._afficher_texte(constantes.FORMAT_NIVEAU % self.niveau, constantes.POSITION_NIVEAU)
-        
+
         self._rendre()
 
     def play(self):
