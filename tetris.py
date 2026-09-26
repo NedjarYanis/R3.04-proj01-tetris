@@ -191,7 +191,7 @@ class Jeu:
 				return False
 			elif cy < 0:
 				continue
-			elif y + cy >= max_y:
+			elif y + cy >= max_y:#verfie que on transperce pas le sole
 #				print("Non valide en Y: cy=%s, y=%s" % (cy, y))
 				return False
 			else:
@@ -208,7 +208,7 @@ class Jeu:
 			None
 		"""
 		print("La pièce est posée")
-		if self.position[1] <= 0:
+		if self.position[1] <= 0: #verfie si la piece depasse au dessus
 			self.perdu = True
 		# Ajout de la pièce parmi le plateau
 		couleur = self._get_current_piece_color()
@@ -216,17 +216,17 @@ class Jeu:
 			self.plateau[cy][cx] = couleur
 		completees: list = []
 		# calculer les lignes complétées
-		for i, line in enumerate(self.plateau[::-1]):
+		for i, line in enumerate(self.plateau[::-1]): #redgarde en partant du bas 
 			for case in line:
-				if case == 0:
-					break
+				if case == 0:#si il y a un troue (0)
+					break #passe a ligne du dessu
 			else:
 				print(self.plateau)
 				print(">>> %s" % (constantes.DIM_PLATEAU[1] - 1 - i))
 				completees.append(constantes.DIM_PLATEAU[1] - 1 - i)
 		lignes = len(completees)
 		for i in completees:
-			self.plateau.pop(i)
+			self.plateau.pop(i)#suprime la ligne
 		for i in range(lignes):
 			self.plateau.insert(0, [0] * constantes.DIM_PLATEAU[0])
 		# calculer le score et autre
@@ -372,6 +372,8 @@ class Jeu:
 			self._gerer_evenements()
 			self._gerer_gravite()
 			self._dessiner_plateau()
+
+
 
 
 if __name__ == '__main__':
